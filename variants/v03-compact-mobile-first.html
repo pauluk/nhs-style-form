@@ -250,5 +250,33 @@ function updateResultPanel() {
   `;
 }
   </script>
+  
+  <script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Attach input event listeners to all form fields
+  const textarea = document.querySelector('textarea[name="risk_statement"]');
+  const appetiteRadios = document.querySelectorAll('input[name="appetite"]');
+  const dayInput = document.getElementById('review-day');
+  const monthInput = document.getElementById('review-month');
+  const yearInput = document.getElementById('review-year');
+  
+  // Function to attach event listeners
+  function attachListener(element, callback) {
+    if (element) {
+      element.addEventListener('input', callback);
+    }
+  }
+  
+  // Attach listeners to all form fields
+  attachListener(textarea, updateResultPanel);
+  appetiteRadios.forEach(radio => attachListener(radio, updateResultPanel));
+  attachListener(dayInput, updateResultPanel);
+  attachListener(monthInput, updateResultPanel);
+  attachListener(yearInput, updateResultPanel);
+  
+  // Call updateResultPanel once immediately to show initial state
+  updateResultPanel();
+});
+  </script>
 </body>
 </html>
