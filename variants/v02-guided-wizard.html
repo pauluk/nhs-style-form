@@ -288,5 +288,104 @@
     <button class="button button--secondary" id="backButton">Back</button>
     <button class="button" id="nextButton">Next</button>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get references to form elements
+      const riskStatementInput = document.getElementById('risk-statement');
+      const appetiteRadios = document.querySelectorAll('input[name="appetite"]');
+      const reviewDayInput = document.getElementById('review-day');
+      const reviewMonthInput = document.getElementById('review-month');
+      const reviewYearInput = document.getElementById('review-year');
+      const resultPanel = document.querySelector('.result-panel');
+      const statementPreview = document.createElement('div');
+      statementPreview.className = 'statement-preview';
+      const ratingGrid = document.createElement('div');
+      ratingGrid.className = 'rating-grid';
+      
+      // Add preview elements to result panel
+      resultPanel.appendChild(statementPreview);
+      resultPanel.appendChild(ratingGrid);
+      
+      // Function to calculate risk score
+      function calculateRiskScore() {
+        // Get risk statement
+        const statement = riskStatementInput.value.trim();
+        
+        // Get selected appetite
+        let appetite = '';
+        for (const radio of appetiteRadios) {
+          if (radio.checked) {
+            appetite = radio.value;
+            break;
+          }
+        }
+        
+        // Map appetite to impact
+        const impactMap = {
+          'Low': 1,
+          'Moderate': 2,
+          'High': 3,
+          'Very high': 4
+        };
+        const impact = impactMap[appetite] || 1;
+        const likelihood = 3;
+        const score = likelihood * impact;
+        
+        // Determine rating based on score
+        let rating = '';
+        if (score >= 1 && score <= 4) {
+          rating = 'Low';
+        } else if (score >= 5 && score <= 9) {
+          rating = 'Moderate';
+        } else if (score >= 10 && score <= 16) {
+          rating = 'High';
+        } else if (score >= 17 && score <= 25) {
+          rating = 'Critical';
+        }
+        
+        // Update statement preview
+        if (statement) {
+          statementPreview.innerHTML = `<p>${statement}</p>`;
+        } else {
+          statementPreview.innerHTML = '<p>Please enter a risk statement</p>';
+        }
+        
+        // Update rating grid
+        ratingGrid.innerHTML = `
+          <div class="rating-card">
+            <span>Score</span>
+            <strong>${score}</strong>
+          </div>
+          <div class="rating-card">
+            <span>Likelihood</span>
+            <strong>${likelihood}</strong>
+          </div>
+          <div class="rating-card">
+            <span>Impact</span>
+            <strong>${impact}</strong>
+          </div>
+          <div class="rating-card">
+            <span>Rating</span>
+            <strong>${rating}</strong>
+          </div>
+        `;
+      }
+      
+      // Add event listeners to all input fields
+      riskStatementInput.addEventListener('input', calculateRiskScore);
+      
+      appetiteRadios.forEach(radio => {
+        radio.addEventListener('change', calculateRiskScore);
+      });
+      
+      reviewDayInput.addEventListener('input', calculateRiskScore);
+      reviewMonthInput.addEventListener('input', calculateRiskScore);
+      reviewYearInput.addEventListener('input', calculateRiskScore);
+      
+      // Initialize calculation
+      calculateRiskScore();
+    });
+  </script>
 </body>
 </html>
