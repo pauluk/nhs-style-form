@@ -102,6 +102,8 @@ p  { max-width: 70ch; }
   <div class="form-panel">
     <h2>Risk Form</h2>
     
+    <div id="form-status" class="status-line" role="status" aria-live="polite"></div>
+    
     <fieldset class="form-group">
       <legend class="field-label">1. Risk statement</legend>
       <p class="hint">Describe the risk using the format: If [cause/driver] happens, then [risk event] may occur, resulting in [business impact].</p>
@@ -158,6 +160,9 @@ p  { max-width: 70ch; }
         </label>
       </fieldset>
     </fieldset>
+    
+    <button class="button" type="submit">Raise risk</button>
+    <button class="button button--secondary" type="button">Save as draft</button>
   </div>
   
   <div class="result-panel">
