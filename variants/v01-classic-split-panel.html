@@ -117,6 +117,36 @@
     @media (max-width: 950px) {
       .page-grid { grid-template-columns: 1fr; }
     }
+    
+    .statement-preview {
+      margin: 0 0 22px;
+      padding: 18px;
+      background: var(--colour-green-wash);
+      border-left: 8px solid var(--colour-green);
+    }
+    .rating-grid { 
+      display: grid; 
+      grid-template-columns: repeat(4, 1fr); 
+      gap: 8px; 
+    }
+    .rating-card { 
+      padding: 10px; 
+      background: var(--colour-grey); 
+      border-top: 5px solid var(--colour-blue); 
+    }
+    .rating-card span { 
+      display: block; 
+      font-size: 12px; 
+    }
+    .rating-card strong { 
+      display: block; 
+      font-size: 20px; 
+    }
+    @media (max-width: 560px) { 
+      .rating-grid { 
+        grid-template-columns: 1fr; 
+      } 
+    }
   </style>
 </head>
 <body>
@@ -189,7 +219,120 @@
         <button class="button button--secondary" type="button">Save as draft</button>
       </div>
     </div>
-    <div class="panel result-panel">Result panel</div>
+    <div class="panel result-panel">
+      <div id="result-content">Result panel</div>
+    </div>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get references to form elements
+      const riskStatement = document.querySelector('textarea[name="risk_statement"]');
+      const appetiteRadios = document.querySelectorAll('input[name="appetite"]');
+      const reviewDay = document.getElementById('review-day');
+      const reviewMonth = document.getElementById('review-month');
+      const reviewYear = document.getElementById('review-year');
+      const resultPanel = document.getElementById('result-content');
+      
+      // Mapping of appetite to impact values
+      const appetiteToImpact = {
+        'Low': 1,
+        'Moderate': 2,
+        'High': 3,
+        'Very high': 4
+      };
+      
+      // Rating thresholds
+      const ratingThresholds = [
+        { min: 1, max: 4, rating: 'Low', colour: '#00703c' },
+        { min: 5, max: 9, rating: 'Moderate', colour: '#ffdd00' },
+        { min: 10, max: 16, rating: 'High', colour: '#f47738' },
+        { min: 17, max: 25, rating: 'Critical', colour: '#d4351c' }
+      ];
+      
+      // Function to get rating based on score
+      function getRating(score) {
+        for (const threshold of ratingThresholds) {
+          if (score >= threshold.min && score <= threshold.max) {
+            return threshold;
+          }
+        }
+        return null;
+      }
+      
+      // Function to update the result panel
+      function updateResultPanel() {
+        // Get values
+        const statement = riskStatement.value.trim();
+        const selectedAppetite = document.querySelector('input[name="appetite"]:checked');
+        const day = reviewDay.value;
+        const month = reviewMonth.value;
+        const year = reviewYear.value;
+        
+        // Create statement preview
+        let statementPreview = '';
+        if (statement) {
+          statementPreview = `<div class="statement-preview">${statement}</div>`;
+        }
+        
+        // Calculate score if we have all required values
+        let score = null;
+        let rating = null;
+        let impact = null;
+        
+        if (selectedAppetite && day && month && year) {
+          // Use fixed likelihood of 3
+          const likelihood = 3;
+          
+          // Get impact based on appetite
+          impact = appetiteToImpact[selectedAppetite.value];
+          
+          // Calculate score
+          score = likelihood * impact;
+          
+          // Get rating
+          rating = getRating(score);
+        }
+        
+        // Build rating grid
+        let ratingGrid = '';
+        if (score !== null && rating !== null) {
+          ratingGrid = `
+            <div class="rating-grid">
+              <div class="rating-card">
+                <span>Score</span>
+                <strong>${score}</strong>
+              </div>
+              <div class="rating-card">
+                <span>Likelihood</span>
+                <strong>3</strong>
+              </div>
+              <div class="rating-card">
+                <span>Impact</span>
+                <strong>${impact}</strong>
+              </div>
+              <div class="rating-card" style="border-top-color: ${rating.colour}">
+                <span>Rating</span>
+                <strong>${rating.rating}</strong>
+              </div>
+            </div>
+          `;
+        }
+        
+        // Update result panel
+        resultPanel.innerHTML = statementPreview + ratingGrid;
+      }
+      
+      // Add event listeners to all form elements
+      riskStatement.addEventListener('input', updateResultPanel);
+      
+      appetiteRadios.forEach(radio => {
+        radio.addEventListener('change', updateResultPanel);
+      });
+      
+      [reviewDay, reviewMonth, reviewYear].forEach(input => {
+        input.addEventListener('input', updateResultPanel);
+      });
+    });
+  </script>
 </body>
 </html>
