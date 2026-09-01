@@ -169,5 +169,86 @@ p  { max-width: 70ch; }
     <h2>Risk Result</h2>
     <p>Result content would go here</p>
   </div>
+  
+  <script>
+function validateAndFormatDate(dayInput, monthInput, yearInput, errorElement) {
+  const day = Number(dayInput.value);
+  const month = Number(monthInput.value);
+  const year = Number(yearInput.value);
+  
+  if (isNaN(day) || isNaN(month) || isNaN(year)) {
+    return null;
+  }
+  
+  const candidate = new Date(Date.UTC(year, month - 1, day));
+  const valid = candidate.getUTCFullYear() === year &&
+    candidate.getUTCMonth() === month - 1 && candidate.getUTCDate() === day;
+    
+  if (!valid) {
+    return null;
+  }
+  
+  return `${year.toString().padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function getRating(score) {
+  if (score >= 1 && score <= 4) return 'Low';
+  if (score >= 5 && score <= 9) return 'Moderate';
+  if (score >= 10 && score <= 16) return 'High';
+  if (score >= 17 && score <= 25) return 'Critical';
+  return 'Unknown';
+}
+
+function updateResultPanel() {
+  const statement = document.querySelector('textarea[name="risk_statement"]').value;
+  const checkedRadio = document.querySelector('input[name="appetite"]:checked');
+  const dayInput = document.getElementById('review-day');
+  const monthInput = document.getElementById('review-month');
+  const yearInput = document.getElementById('review-year');
+  
+  if (!statement || !checkedRadio) return;
+  
+  const reviewDate = validateAndFormatDate(dayInput, monthInput, yearInput);
+  if (!reviewDate) return;
+  
+  const appetite = checkedRadio.value;
+  const impact = appetite === 'Low' ? 1 : 
+                appetite === 'Moderate' ? 2 : 
+                appetite === 'High' ? 3 : 4;
+  const likelihood = 3;
+  const score = likelihood * impact;
+  const rating = getRating(score);
+  
+  const statementPreview = `<div class="statement-preview">
+    <p><strong>Risk statement:</strong> ${statement}</p>
+    <p><strong>Review date:</strong> ${reviewDate}</p>
+  </div>`;
+  
+  const ratingGrid = `<div class="rating-grid">
+    <div class="rating-card">
+      <span>Score</span>
+      <strong>${score}</strong>
+    </div>
+    <div class="rating-card">
+      <span>Likelihood</span>
+      <strong>${likelihood}</strong>
+    </div>
+    <div class="rating-card">
+      <span>Impact</span>
+      <strong>${impact}</strong>
+    </div>
+    <div class="rating-card">
+      <span>Rating</span>
+      <strong>${rating}</strong>
+    </div>
+  </div>`;
+  
+  document.querySelector('.result-panel').innerHTML = `
+    <h2>Risk Result</h2>
+    ${statementPreview}
+    ${ratingGrid}
+  `;
+}
+  </script>
 </body>
 </html>
