@@ -48,8 +48,49 @@
   --shadow-panel: 0 2px 8px rgb(0 0 0 / 7%);
   --shadow-dialog: 0 24px 70px rgb(0 27 68 / 67%);
 }
+
+* { box-sizing: border-box; }
+.service-header {
+  color: #fff;
+  background: var(--colour-blue);
+  border-bottom: 6px solid var(--colour-blue-dark);
+}
+.service-header__inner {
+  max-width: var(--content-max);
+  margin: auto;
+  padding: 20px 24px;
+  font-size: 23px;
+  font-weight: 700;
+}
+.page-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, var(--form-column)) minmax(0, 1fr);
+  gap: 22px;
+  max-width: var(--content-max);
+  margin: auto;
+  padding: 24px;
+}
+.panel {
+  min-width: 0;
+  background: var(--colour-panel);
+  border: 1px solid var(--colour-border);
+  box-shadow: var(--shadow-panel);
+}
+@media (max-width: 950px) {
+  .page-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .page-grid { padding: 10px; }
+}
   </style>
 </head>
 <body>
+  <header class="service-header">
+    <div class="service-header__inner">Risk Register</div>
+  </header>
+  <div class="page-grid">
+    <div class="panel form-panel"></div>
+    <div class="panel result-panel"></div>
+  </div>
 </body>
 </html>
