@@ -113,6 +113,15 @@
       border-bottom-width: 3px;
     }
     .button--secondary:hover { color: #fff; background: var(--colour-blue); }
+    button:focus-visible,
+    input:focus,
+    textarea:focus,
+    select:focus,
+    summary:focus-visible {
+      outline: 3px solid var(--colour-focus);
+      outline-offset: 0;
+      box-shadow: inset 0 0 0 2px #0b0c0c;
+    }
     .status-line { min-height: 24px; font-weight: 700; }
     @media (max-width: 950px) {
       .page-grid { grid-template-columns: 1fr; }
@@ -165,24 +174,27 @@
         <fieldset class="form-group">
           <legend class="field-label">2. Assessment</legend>
           
-          <fieldset class="date-input" aria-describedby="review-date-hint">
+          <fieldset class="date-input" aria-describedby="review-date-hint review-date-error">
             <legend class="field-label">Review date</legend>
             <div id="review-date-hint" class="hint">For example, 31 8 2026</div>
+            <p id="review-date-error" class="error-message" hidden>
+              Enter a real review date using day, month and year.
+            </p>
             <div class="date-input__items">
               <div class="date-input__item">
                 <label for="review-day">Day</label>
                 <input id="review-day" name="review_day" inputmode="numeric"
-                       autocomplete="off" maxlength="2" pattern="[0-9]*" size="2">
+                       autocomplete="off" maxlength="2" pattern="[0-9]*" size="2" aria-describedby="review-date-hint">
               </div>
               <div class="date-input__item">
                 <label for="review-month">Month</label>
                 <input id="review-month" name="review_month" inputmode="numeric"
-                       autocomplete="off" maxlength="2" pattern="[0-9]*" size="2">
+                       autocomplete="off" maxlength="2" pattern="[0-9]*" size="2" aria-describedby="review-date-hint">
               </div>
               <div class="date-input__item date-input__item--year">
                 <label for="review-year">Year</label>
                 <input id="review-year" name="review_year" inputmode="numeric"
-                       autocomplete="off" maxlength="4" pattern="[0-9]*" size="4">
+                       autocomplete="off" maxlength="4" pattern="[0-9]*" size="4" aria-describedby="review-date-hint">
               </div>
             </div>
           </fieldset>
@@ -279,7 +291,30 @@
         let rating = null;
         let impact = null;
         
-        if (selectedAppetite && day && month && year) {
+        // Validate date fields
+        let dateValid = true;
+        if (day || month || year) {
+          // If any date field is filled, all must be filled
+          if (!day || !month || !year) {
+            dateValid = false;
+          } else {
+            // Validate that day and month are numbers and year is a 4-digit number
+            if (isNaN(day) || isNaN(month) || isNaN(year) || year.length !== 4) {
+              dateValid = false;
+            } else {
+              // Check if day and month are valid
+              const dayNum = parseInt(day);
+              const monthNum = parseInt(month);
+              const yearNum = parseInt(year);
+              
+              if (dayNum < 1 || dayNum > 31 || monthNum < 1 || monthNum > 12) {
+                dateValid = false;
+              }
+            }
+          }
+        }
+        
+        if (selectedAppetite && dateValid) {
           // Use fixed likelihood of 3
           const likelihood = 3;
           
