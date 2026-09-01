@@ -5,45 +5,61 @@ cd "$(dirname "$0")/.."
 export PATH="$HOME/.local/bin:$PATH"
 export OLLAMA_API_BASE="http://192.168.0.141:11434"
 
+AIDER="aider --model ollama_chat/qwen3-coder:30b --edit-format diff --yes-always"
 VARIANTS_DIR="variants"
 mkdir -p "$VARIANTS_DIR"
 
+# --- Variant definitions ---------------------------------------------------
 SLUGS=("v01-classic-split-panel" "v02-guided-wizard" "v03-compact-mobile-first")
-BRIEFS=(
-  "Classic split-panel layout exactly per STYLE_GUIDE.md sections 4, 5, 11: a two-column page-grid with the risk register form on the left and a live calculated statement-preview + rating-grid on the right, updating as the user types."
-  "Guided step-by-step wizard: one numbered form section visible at a time (1. Risk statement, then 2. Assessment and ownership, then 3. Review), with Next/Back buttons, a progress indicator, and the result panel only shown as a full-width final review step (use the 'form collapsed' state described in section 4)."
-  "Compact single-column, mobile-first layout: form and result stacked vertically, minimal chrome, optional/advanced fields tucked into <details> disclosures per section 13, optimized to look right at 360px width with no horizontal scroll."
+TITLES=("Risk Register - Classic Split Panel" "Risk Register - Guided Wizard" "Risk Register - Compact Mobile-First")
+LAYOUT_STEPS=(
+  "Add a two-column CSS grid layout inside body: a .service-header banner at the top (blue background, white text, title inside), then a .page-grid div containing two .panel divs side by side (form-panel and result-panel), using the grid-template-columns pattern from STYLE_GUIDE.md section 4. Leave both panels empty for now. Add the necessary CSS to the existing style block, including the @media breakpoint at 950px that stacks the columns."
+  "Add a single-column wizard layout inside body: a .service-header banner at top (blue background, white text, title inside), then a .wizard-progress bar showing 3 numbered steps (1 Risk statement, 2 Assessment and ownership, 3 Review), then a single .panel.form-panel div, and a hidden .panel.result-panel div (display:none by default, shown only on the final review step). Add Next/Back buttons at the bottom of form-panel. Add the necessary CSS."
+  "Add a single-column, mobile-first stacked layout inside body: a compact .service-header banner at top (blue background, white text, title inside), then a .panel.form-panel div, then directly below it a .panel.result-panel div (both full width, stacked vertically, no side-by-side grid). Add the necessary CSS, keeping padding tight and everything usable at 360px width."
 )
+FIELDS_STEP="Inside the form-panel div (or the first wizard step if this is a wizard layout), add the actual form fields: a fieldset with legend '1. Risk statement' containing a textarea for the risk statement following the syntax 'If [cause/driver] happens, then [risk event] may occur, resulting in [business impact].', with a hint below the label; a fieldset with legend '2. Assessment' containing the boxed Day/Month/Year date pattern from STYLE_GUIDE.md section 7 for a 'Review date' field (three separate labelled number inputs: Day, Month, Year), and the large radio-button pattern from section 8 for 'Risk appetite' with four options: Low, Moderate, High, Very high, each with a short description. Use realistic labels and hints per section 19."
+BUTTONS_STEP="Add a primary button labelled 'Raise risk' (class 'button') and a secondary button labelled 'Save as draft' (class 'button button--secondary') at the bottom of the form. Also add an empty notice area with id 'form-status' (class 'status-line') above the buttons for showing validation/status messages, styled per STYLE_GUIDE.md section 10."
+JS_STEP="Add a <script> block before </body> that: reads the risk statement text, risk appetite radio value, and the day/month/year date fields; on any input change, recalculates a risk score by picking likelihood=3 and impact based on the selected risk appetite (Low=1, Moderate=2, High=3, Very high=4), computing score = likelihood * impact_mapped_to_1_5_scale, and live-updates the result-panel div with: the composed risk statement text inside a div with class 'statement-preview', and a rating-grid div (class 'rating-grid') showing 4 rating-card divs for Score, Likelihood, Impact, and Rating (Low/Moderate/High/Critical based on the 5x5 threshold table in section 11). Use plain vanilla JavaScript, no frameworks, wired up with addEventListener on DOMContentLoaded."
+REFINE_STEP="Review this file against STYLE_GUIDE.md section 20's definition-of-done checklist. Fix any gaps you find, especially: visible focus states (focus-visible outline per section 6), semantic fieldset/legend usage, aria-describedby links between hints/errors and fields, the boxed date behaviour contract (accept one- or two-digit day/month, no auto-correct), and making sure the rating preview recalculates live as fields change. Do not change the overall layout approach or add new major sections."
 
 INDEX="$VARIANTS_DIR/INDEX.md"
-if [ ! -f "$INDEX" ]; then
-  {
-    echo "# Variant index"
-    echo ""
-    echo "Generated by \`scripts/loop-variants.sh\`. Each variant is a self-contained HTML file (no build step) implementing the Risk Register example form from \`STYLE_GUIDE.md\`, exploring a different layout approach. Open any file directly in a browser to compare."
-    echo ""
-  } > "$INDEX"
-fi
+{
+  echo "# Variant index"
+  echo ""
+  echo "Generated by \`scripts/loop-variants.sh\`. Each variant is a self-contained HTML file (no build step) implementing the Risk Register example form from \`STYLE_GUIDE.md\`, exploring a different layout approach. Open any file directly in a browser to compare."
+  echo ""
+} > "$INDEX"
 
 for i in "${!SLUGS[@]}"; do
   SLUG="${SLUGS[$i]}"
-  BRIEF="${BRIEFS[$i]}"
+  TITLE="${TITLES[$i]}"
+  LAYOUT="${LAYOUT_STEPS[$i]}"
   FILE="$VARIANTS_DIR/$SLUG.html"
 
   echo "=================================================="
-  echo "=== [$((i+1))/${#SLUGS[@]}] Creating $SLUG"
+  echo "=== [$((i+1))/${#SLUGS[@]}] $SLUG - step 1/6: skeleton"
   echo "=================================================="
-  aider --read STYLE_GUIDE.md --yes-always --message "Create a new self-contained file at $FILE. It must be a single standalone HTML file (inline <style> and <script>, no external build step, no external font/CDN dependencies) implementing a Risk Register entry form, following every applicable pattern in STYLE_GUIDE.md: design tokens, typography, the boxed Day/Month/Year date pattern (section 7), the large radio-button pattern (section 8) for risk appetite (Low/Moderate/High/Very high), buttons (section 9), notices/errors (section 10), and the calculated statement preview + rating grid (section 11, live-updating client-side as the user types, using the 5x5 threshold table). Layout approach for this variant: $BRIEF Use realistic field labels and hints per section 19's content style, and the risk syntax: 'If [cause/driver] happens, then [risk event] may occur, resulting in [business impact].'" "$FILE"
+  rm -f "$FILE"
+  $AIDER --message "Create a new minimal file at $FILE with just: <!DOCTYPE html>, an html/head/body shell, a <title>$TITLE</title>, a <style> block containing only the :root CSS custom properties from STYLE_GUIDE.md section 2 (design tokens) plus the base body/heading typography from section 3, and an empty <body></body>. Nothing else yet." "$FILE"
 
-  echo "=================================================="
-  echo "=== [$((i+1))/${#SLUGS[@]}] Refining $SLUG"
-  echo "=================================================="
-  aider --read STYLE_GUIDE.md --yes-always --message "Review $FILE against STYLE_GUIDE.md section 20's definition-of-done checklist. Fix any gaps you find, especially: visible focus states, semantic fieldset/legend usage, aria-describedby links between errors and fields, the boxed date behaviour contract (accept one- or two-digit day/month, no auto-correct of invalid dates, real calendar-date validation on submit), and making sure the rating preview recalculates live as fields change. Do not change the overall layout approach." "$FILE"
+  echo "=== [$((i+1))/${#SLUGS[@]}] $SLUG - step 2/6: layout shell"
+  $AIDER --read STYLE_GUIDE.md --message "In $FILE, $LAYOUT" "$FILE"
 
-  DESC=$(echo "$BRIEF" | cut -c1-160)
-  echo "- [\`$SLUG.html\`](./$SLUG.html) — $DESC" >> "$INDEX"
+  echo "=== [$((i+1))/${#SLUGS[@]}] $SLUG - step 3/6: form fields"
+  $AIDER --read STYLE_GUIDE.md --message "In $FILE, $FIELDS_STEP" "$FILE"
 
-  echo "=== $SLUG done, index updated ==="
+  echo "=== [$((i+1))/${#SLUGS[@]}] $SLUG - step 4/6: buttons and status"
+  $AIDER --read STYLE_GUIDE.md --message "In $FILE, $BUTTONS_STEP" "$FILE"
+
+  echo "=== [$((i+1))/${#SLUGS[@]}] $SLUG - step 5/6: live calculation JS"
+  $AIDER --read STYLE_GUIDE.md --message "In $FILE, $JS_STEP" "$FILE"
+
+  echo "=== [$((i+1))/${#SLUGS[@]}] $SLUG - step 6/6: refine"
+  $AIDER --read STYLE_GUIDE.md --message "In $FILE, $REFINE_STEP" "$FILE"
+
+  SIZE=$(wc -c < "$FILE" | tr -d ' ')
+  echo "- [\`$SLUG.html\`](./$SLUG.html) — $TITLE (${SIZE} bytes)" >> "$INDEX"
+  echo "=== $SLUG done (${SIZE} bytes), index updated ==="
 done
 
 echo ""
