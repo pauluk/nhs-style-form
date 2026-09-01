@@ -208,7 +208,65 @@
   <div class="panel form-panel">
     <h2>Risk Statement</h2>
     <p>Enter the risk statement and supporting details.</p>
-    <!-- Form content would go here -->
+    
+    <form>
+      <fieldset class="form-group">
+        <legend class="field-label">1. Risk statement</legend>
+        <p class="hint">Use the syntax: If [cause/driver] happens, then [risk event] may occur, resulting in [business impact].</p>
+        <textarea id="risk-statement" name="risk_statement" rows="4" cols="50" required></textarea>
+      </fieldset>
+      
+      <fieldset class="form-group">
+        <legend class="field-label">2. Assessment</legend>
+        
+        <fieldset class="date-input" aria-describedby="review-date-hint">
+          <legend class="field-label">Review date</legend>
+          <div id="review-date-hint" class="hint">For example, 31 8 2026</div>
+          <div class="date-input__items">
+            <div class="date-input__item">
+              <label for="review-day">Day</label>
+              <input id="review-day" name="review_day" inputmode="numeric"
+                     autocomplete="off" maxlength="2" pattern="[0-9]*" size="2">
+            </div>
+            <div class="date-input__item">
+              <label for="review-month">Month</label>
+              <input id="review-month" name="review_month" inputmode="numeric"
+                     autocomplete="off" maxlength="2" pattern="[0-9]*" size="2">
+            </div>
+            <div class="date-input__item date-input__item--year">
+              <label for="review-year">Year</label>
+              <input id="review-year" name="review_year" inputmode="numeric"
+                     autocomplete="off" maxlength="4" pattern="[0-9]*" size="4">
+            </div>
+          </div>
+        </fieldset>
+        
+        <fieldset class="choice-group" aria-describedby="appetite-hint">
+          <legend class="field-label">Risk appetite</legend>
+          <div id="appetite-hint" class="hint">Select one option.</div>
+          <label class="large-radio">
+            <input type="radio" name="appetite" value="Low">
+            <span class="large-radio__control" aria-hidden="true"></span>
+            <span><strong>Low</strong><small>Only limited exposure is acceptable.</small></span>
+          </label>
+          <label class="large-radio">
+            <input type="radio" name="appetite" value="Moderate">
+            <span class="large-radio__control" aria-hidden="true"></span>
+            <span><strong>Moderate</strong><small>Managed exposure may be accepted.</small></span>
+          </label>
+          <label class="large-radio">
+            <input type="radio" name="appetite" value="High">
+            <span class="large-radio__control" aria-hidden="true"></span>
+            <span><strong>High</strong><small>Significant exposure may be taken.</small></span>
+          </label>
+          <label class="large-radio">
+            <input type="radio" name="appetite" value="Very high">
+            <span class="large-radio__control" aria-hidden="true"></span>
+            <span><strong>Very high</strong><small>High exposure is acceptable.</small></span>
+          </label>
+        </fieldset>
+      </fieldset>
+    </form>
   </div>
   
   <div class="panel result-panel">
