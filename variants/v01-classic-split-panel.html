@@ -89,6 +89,31 @@
       border: 1px solid var(--colour-border);
       box-shadow: var(--shadow-panel);
     }
+    .button {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 10px 16px;
+      color: #fff;
+      background: var(--colour-green);
+      border: 0;
+      border-bottom: 4px solid var(--colour-green-dark);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .button:hover { filter: brightness(.88); }
+    .button:disabled { opacity: .65; cursor: not-allowed; }
+    .button--secondary {
+      color: var(--colour-blue);
+      background: #fff;
+      border: 2px solid var(--colour-blue);
+      border-bottom-width: 3px;
+    }
+    .button--secondary:hover { color: #fff; background: var(--colour-blue); }
+    .status-line { min-height: 24px; font-weight: 700; }
     @media (max-width: 950px) {
       .page-grid { grid-template-columns: 1fr; }
     }
@@ -158,6 +183,11 @@
           </fieldset>
         </fieldset>
       </form>
+      <div id="form-status" class="status-line"></div>
+      <div style="margin-top: 16px; display: flex; gap: 16px;">
+        <button class="button" type="submit">Raise risk</button>
+        <button class="button button--secondary" type="button">Save as draft</button>
+      </div>
     </div>
     <div class="panel result-panel">Result panel</div>
   </div>
